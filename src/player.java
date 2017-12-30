@@ -6,6 +6,7 @@ public class player {
     String name;
     String color;
     int id;
+    int characterid;
     int Hp = 3;
     int Mp = 0;
     int target_x = 0;

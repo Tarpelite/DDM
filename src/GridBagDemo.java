@@ -80,8 +80,8 @@ public class GridBagDemo extends JFrame implements gameconfig {
         }
         JPanel blank1 = new JPanel();
         JPanel blank2 = new JPanel();
-        this.getLayeredPane().add(bg,new Integer(Integer.MIN_VALUE));
-        bg.setBounds(0,0,bg_pic.getIconWidth(),bg_pic.getIconHeight());
+        pick(p1);
+        pick(p2);
 
 //        String []conts = new String[5];
         String conts[] = {"攻击", "魔法", "投掷","移动", "结束"};
@@ -300,6 +300,19 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 }catch (WinnerException e1){
                     end(currentplayer);
                 }
+            }
+        });
+        button_list[1].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentplayer.characterid==0)
+                    Priest(currentplayer);
+                if(currentplayer.characterid==1)
+                    singer(currentplayer);
+                if(currentplayer.characterid==2)
+                    shaman(currentplayer,opponent);
+                if(currentplayer.characterid==3)
+                    constructer(currentplayer);
             }
         });
 
@@ -1061,6 +1074,96 @@ public class GridBagDemo extends JFrame implements gameconfig {
     public void run() {
         currentplayer = p1;
         opponent = p2;
-        buttonlist_event();
+        buttonlist_event(
+          
+    }
+    public void Priest(player p){
+        if(p.Mp<5)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            Object[] options = {"确定", "取消"};
+            int response = JOptionPane.showOptionDialog(null, "你将使用牧师技能", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            for (int i = 0; i < p.hand.size(); i++) {
+                p.hand.get(i).Hp += 2;
+            }
+            p.Mp -= 5;
+        }
+    }
+    public void constructer(player p){
+        if(p.Mp<7)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            int x, y;
+            String inputValue = JOptionPane.showInputDialog("请输入要填充的土地坐标");
+            String[] index = inputValue.split(" ");
+            x = Integer.valueOf(index[0]);
+            y = Integer.valueOf(index[1]);
+            board[x][y] = -1 * p.id;
+            p.Mp-=7;
+        }
+    }
+    public void singer(player p){
+        if(p.Mp<5)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            ArrayList<Object> options = new ArrayList<Object>();
+            for (Monster m : p1.alive) {
+                options.add(m.name);
+            }
+            int response = JOptionPane.showOptionDialog(null, "你将使用歌颂者技能，请选择你要强化的怪兽", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options.toArray(), options.toArray()[0]);
+            p1.alive.get(response).Atk += 2;
+            p.Mp-=5;
+        }
+    }
+    public void shaman(player p1,player p2){
+        if(p1.Mp<10)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            ArrayList<Object> options = new ArrayList<Object>();
+            for (Monster m : p1.alive) {
+                options.add(m.name);
+            }
+            int response = JOptionPane.showOptionDialog(null, "你将使用萨满技能，请选择你想献祭的怪兽", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options.toArray(), options.toArray()[0]);
+            int t = response;
+            p1.alive.get(t).Hp = 0;
+            for (int i = 0; i < p2.alive.size(); i++) {
+                if (p2.alive.get(i).y == p1.alive.get(t).y) {
+                    p2.alive.get(i).Hp -= p1.alive.get(t).Atk;
+                    if (p2.alive.get(i).Hp < 0)
+                        p2.alive.remove(i--);
+                }
+            }
+            p1.alive.remove(t);
+            p1.Mp-=10;
+        }
+    }
+    public void pick(player p){
+        Object[] options={"医疗兵","拉拉队员","萨满祭司","建筑工人"};
+        int response = JOptionPane.showOptionDialog(null,"请"+p.id+"号玩家选择你的角色","角色选择",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,options[0]);
+        p.characterid=response;
+        if(p.characterid==0){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"医疗兵的技能为：为你的所有怪兽恢复两点生命，消耗移动点数5","医疗兵",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==1){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"拉拉队员的技能为：为你的一只怪兽增加两点攻击，消耗移动点数5","拉拉队员",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==2){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"萨满祭司的技能为：消灭自己的一只怪兽，对一整列上对方怪兽造成等同于其攻击力的伤害，消耗移动点数10","萨满祭司",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==3){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"建筑工人的技能为：填充某一块陆地，使其可以行走，消耗移动点数7","建筑工人",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
     }
 }
