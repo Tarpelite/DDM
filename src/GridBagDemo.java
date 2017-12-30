@@ -80,6 +80,9 @@ public class GridBagDemo extends JFrame implements gameconfig {
         }
         JPanel blank1 = new JPanel();
         JPanel blank2 = new JPanel();
+        show_rule();
+        pick(p1);
+        pick(p2);
         this.getLayeredPane().add(bg,new Integer(Integer.MIN_VALUE));
         bg.setBounds(0,0,bg_pic.getIconWidth(),bg_pic.getIconHeight());
 
@@ -104,10 +107,10 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     label[i][j].setAlignment(Label.CENTER);
                 }
                 else{
-                        label[i][j].setBackground(Color.white);
-                        label[i][j].setForeground(Color.yellow);
-                        label[i][j].setAlignment(Label.CENTER);
-                    }
+                    label[i][j].setBackground(Color.white);
+                    label[i][j].setForeground(Color.yellow);
+                    label[i][j].setAlignment(Label.CENTER);
+                }
                 battle_field.add(label[i][j]);
             }
         }
@@ -261,7 +264,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                         }
                         JOptionPane.showMessageDialog(frame,result[0]+result[1]+result[2],"确认投掷结果",JOptionPane.INFORMATION_MESSAGE);
                         ArrayList<Object> options = new ArrayList<>();
-                     //Object[] options = {"空","空","空","取消"};
+                        //Object[] options = {"空","空","空","取消"};
                         for (Monster mst :tmp  ) {
                             if(mst.summon_pre) {
                                 options.add(mst.name);
@@ -300,6 +303,19 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 }catch (WinnerException e1){
                     end(currentplayer);
                 }
+            }
+        });
+        button_list[1].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(currentplayer.characterid==0)
+                    Priest(currentplayer);
+                if(currentplayer.characterid==1)
+                    singer(currentplayer);
+                if(currentplayer.characterid==2)
+                    shaman(currentplayer,opponent);
+                if(currentplayer.characterid==3)
+                    constructer(currentplayer);
             }
         });
 
@@ -625,7 +641,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
+                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -680,7 +696,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
+                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -739,7 +755,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
 //        System.out.println(p.name + "可以使用的怪兽有：");
         ArrayList<Object> options = new ArrayList<>();
         for (Monster m : p.alive) {
-                options.add(m.name);
+            options.add(m.name);
         }
         options.add("取消");
 //        System.out.println();
@@ -757,16 +773,23 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     JOptionPane.showConfirmDialog(this,m.name+" 攻击力:"+m.Atk+"\r\n生命值:"+m.Hp+"\r\n坐标:("+m.x+","+m.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
                     int x = m.x;
                     int y = m.y;
-                    if (x == p.target_x && y == p.target_y) {
-                        System.out.print(opponent.name + "\\");
-                        option2.add(opponent.name);
+                    if (p.id == 1) {
+                        {
+                            if (x == 18 && y == 10 || x == 19 && y == 9 || x == 20 && y == 11) {
+                                option2.add(opponent.name);
+                            }
+                        }
+                    }
+                    else{
+                        if( x== 2&& y == 10 || x==1 && y==9 || x==3 && y==11){
+                            option2.add(opponent.name);
+                        }
                     }
                     if (board_M[x - 1][y] > 0) {
                         for (Monster e : opponent.alive) {
                             if (board_M[x - 1][y] == e.getId()) {
                                 targets.add(e);
                                 option2.add(e.name);
-//                                System.out.print(e.name + "\\");
                             }
                         }
                     }
@@ -808,18 +831,19 @@ public class GridBagDemo extends JFrame implements gameconfig {
 //            System.out.println("请选择攻击的目标（输入名称）按Q退出：");
             if(!option2.toArray()[response2].equals("取消")) {
                 cmd = (String) option2.toArray()[response2];
-                 if (cmd.equals(opponent.name)) {
+                if (cmd.equals(opponent.name)) {
                     opponent.Hp--;
                     JOptionPane.showConfirmDialog(this,opponent.name+"被"+attacker.name+"狠狠揍了一顿，生命值-1","痛击",JOptionPane.INFORMATION_MESSAGE);
                     if (check(opponent)) throw new WinnerException();
                 } else {
                     for (Monster e : opponent.alive) {
                         if (e.name.equals(cmd)) {
-                            JOptionPane.showMessageDialog(this,e.name+" 攻击力:"+e.Atk+"\r\n生命值:"+e.Hp+"\r\n坐标:("+e.x+","+e.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
+                            JOptionPane.showConfirmDialog(this,e.name+" 攻击力:"+e.Atk+"\r\n生命值:"+e.Hp+"\r\n坐标:("+e.x+","+e.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
                             e.Hp -= attacker.Atk;
                             if (e.Hp <= 0) {
-                                if (opponent.id == 1) board[e.x][e.y] = -1;
-                                else board_M[e.x][e.y] = 0;
+//                                if (opponent.id == 1) board[e.x][e.y] = -1;
+//                                else board[e.x][e.y] = -2;
+                                board_M[e.x][e.y] = 0;
                                 opponent.alive.remove(e);
                                 update(p);
                                 if (check(opponent)) throw new WinnerException();
@@ -847,7 +871,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
         return false;
     }
     boolean isConencted(int x1,int y1,int x2,int y2){
-       Queue<Pair>Q = new LinkedList<Pair>();
+        Queue<Pair>Q = new LinkedList<Pair>();
         Pair ps = new Pair<Integer,Integer>(x1,y1);
         Pair pt = new Pair<Integer,Integer>(x2,y2);
         boolean [][]vis = new boolean[size][size];
@@ -927,9 +951,9 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 } catch (conflictException1 a) {
                     System.out.println(a.toString());
                 }
-                }
             }
         }
+    }
 
 
 
@@ -949,7 +973,6 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     label[i][j].setBackground(Color.white);
                     if (board_M[i][j] < 0) {
                         label[i][j].setText("");
-                        label[i][j].setSize(20,20);
                     }
                 }
             }
@@ -964,13 +987,11 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             if (m.getId() == board_M[i][j]) {
                                 label[i][j].setText(Integer.toString(m.getId()));
                                 label[i][j].setBackground(Color.blue);
-                                label[i][j].setSize(20,20);
                             }
                         }
                     } else {
                         label[i][j].setBackground(Color.blue);
                         label[i][j].setText("");
-                        label[i][j].setSize(20,20);
                     }
                 } else if (board[i][j] == -p2.id) {
                     if (board_M[i][j] > 0) {
@@ -984,13 +1005,11 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     } else {
                         label[i][j].setBackground(Color.red);
                         label[i][j].setText("");
-                        label[i][j].setSize(20,20);
                     }
                 } else {
                     for (Monster m : property) {
                         if (m.getId() == board[i][j]) {
                             label[i][j].setText(Integer.toString(m.getId()));
-                            label[i][j].setSize(20,20);
                         }
                     }
                 }
@@ -1042,7 +1061,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
         Monster m = currentplayer.hand.get(curse_x-1);
         hand_cards[curse_x].setBorder(BorderFactory.createLineBorder(Color.green));
         pic_field_update(m.pic_big);
-        info_board_update("<html><h2>"+m.name+"</h2><br>"+"<h2>怪兽id："+m.getId()+"</h2><br>"+m.Description+"</html>");
+        info_board_update("<html><h3>"+m.name+"</h3><br>"+"<h3>怪兽id："+m.getId()+"</h3><br>"+m.Description+"</html>");
         for(int i=1;i<=6;i++)
         {
             if(i!=curse_x)hand_cards[i].setBorder(BorderFactory.createLineBorder(Color.black));
@@ -1062,5 +1081,115 @@ public class GridBagDemo extends JFrame implements gameconfig {
         currentplayer = p1;
         opponent = p2;
         buttonlist_event();
+    }
+    public void Priest(player p){
+        if(p.Mp<15)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            Object[] options = {"确定", "取消"};
+            int response = JOptionPane.showOptionDialog(null, "你将使用牧师技能", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            for (int i = 0; i < p.hand.size(); i++) {
+                p.hand.get(i).Hp += 200;
+            }
+            p.Mp -= 15;
+        }
+    }
+    public void constructer(player p){
+        if(p.Mp<7)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            int x, y;
+            String inputValue = JOptionPane.showInputDialog("请输入要填充的土地坐标");
+            String[] index = inputValue.split(" ");
+            x = Integer.valueOf(index[0]);
+            y = Integer.valueOf(index[1]);
+            board[x][y] = -1 * p.id;
+            p.Mp-=7;
+        }
+    }
+    public void singer(player p){
+        if(p.Mp<5)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            ArrayList<Object> options = new ArrayList<Object>();
+            for (Monster m : p1.alive) {
+                options.add(m.name);
+            }
+            int response = JOptionPane.showOptionDialog(null, "你将使用歌颂者技能，请选择你要强化的怪兽", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options.toArray(), options.toArray()[0]);
+            p1.alive.get(response).Atk += 200;
+            p.Mp-=5;
+        }
+    }
+    public void shaman(player p1,player p2){
+        if(p1.Mp<10)
+            JOptionPane.showMessageDialog(this,"移动点数不够","技能使用失败",JOptionPane.WARNING_MESSAGE);
+        else {
+            ArrayList<Object> options = new ArrayList<Object>();
+            for (Monster m : p1.alive) {
+                options.add(m.name);
+            }
+            int response = JOptionPane.showOptionDialog(null, "你将使用萨满技能，请选择你想献祭的怪兽", "使用技能", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options.toArray(), options.toArray()[0]);
+            int t = response;
+            p1.alive.get(t).Hp = 0;
+            for (int i = 0; i < p2.alive.size(); i++) {
+                if (p2.alive.get(i).y == p1.alive.get(t).y) {
+                    p2.alive.get(i).Hp -= p1.alive.get(t).Atk;
+                    if (p2.alive.get(i).Hp < 0)
+                        p2.alive.remove(i--);
+                }
+            }
+            p1.alive.remove(t);
+            p1.Mp-=10;
+        }
+    }
+    public void pick(player p){
+        Object[] options={"医疗兵","拉拉队员","萨满祭司","建筑工人"};
+        int response = JOptionPane.showOptionDialog(null,"请"+p.id+"号玩家选择你的角色","角色选择",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,options[0]);
+        p.characterid=response;
+        if(p.characterid==0){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"医疗兵的技能为：为你的所有怪兽恢复两点生命，消耗移动点数5","医疗兵",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==1){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"拉拉队员的技能为：为你的一只怪兽增加两点攻击，消耗移动点数5","拉拉队员",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==2){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"萨满祭司的技能为：消灭自己的一只怪兽，对一整列上对方怪兽造成等同于其攻击力的伤害，消耗移动点数10","萨满祭司",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+        else if(p.characterid==3){
+            Object[] options0={"确定","取消"};
+            int response0 = JOptionPane.showOptionDialog(null,"建筑工人的技能为：填充某一块陆地，使其可以行走，消耗移动点数7","建筑工人",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options0,options0[0]);
+            if(response0==1)
+                pick(p);
+        }
+    }
+
+    public void show_rule(){
+        File f=new File("src/GameRule.txt");
+            InputStream inputStream;
+            try {
+                inputStream = new FileInputStream(f);
+
+                StringBuilder stringBuilder = new StringBuilder();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String msg="";
+                String s1;
+                while ( ((s1 = bufferedReader.readLine()) != null))
+                {
+                    msg = msg+"\n"+s1;
+                }
+                JOptionPane.showMessageDialog(null,msg,"欢迎来到DDM的世界",JOptionPane.INFORMATION_MESSAGE);
+            }catch (Exception e) {
+            }
+
     }
 }
