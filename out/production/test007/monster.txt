@@ -1,0 +1,6 @@
+Demon 1 1 7 3 10 Description
+Angel 2 1 5 4 7 Description
+Knight 3 2 5 5 4 Description
+Magician 4 2 2 3 6 Description
+Fairy 5 1 1 2 1 Description
+Monkey_King 6 1 4 2 2 Description

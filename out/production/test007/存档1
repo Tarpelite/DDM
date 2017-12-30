@@ -1,0 +1,126 @@
+import javax.swing.*;
+import java.awt.*;
+
+public class GridBagDemo extends JFrame {
+
+    public static void main(String[]args){
+        GridBagDemo demo = new GridBagDemo();
+    }
+    JPanel navigation_panel = new JPanel();
+
+    public GridBagDemo(){
+        init();
+        this.setSize(800,800);
+        this.setVisible(true);
+    }
+
+    public void init(){
+        JLabel j1 = new JLabel("<html>昵称：Jim<br>Hp:1 Mp:1 攻击点数：1 防御点数：1 魔法点数：1<br>昵称：Tom<br>Hp:1 Mp:1 攻击点数：1 防御点数：1 魔法点数：1</html>");
+        ImageIcon i1 = new ImageIcon("pic_1.jpg");
+        JLabel j2 = new JLabel();
+        j2.setIcon(i1);
+        JLabel j3 = new JLabel("<html><h2>黑魔导师</h1><br>通常怪兽<br>ATK:5 DFS:3 Hp:3/3<br></html>");
+
+
+        JPanel j4 = new JPanel();
+        JLabel hand_cards[] = new JLabel[7];
+        for(int i=1;i<=6;i++)
+        {
+            hand_cards[i] = new JLabel();
+            hand_cards[i].setSize(20,20);
+            ImageIcon icon = new ImageIcon("1.jpg");
+            hand_cards[i].setIcon(icon);
+            j4.add(hand_cards[i]);
+        }
+        JPanel blank0 = new JPanel();
+        JPanel blank1 = new JPanel();
+        JPanel blank2 = new JPanel();
+
+        JPanel button_panel = new JPanel();
+//        String []conts = new String[5];
+        String conts[] = {"攻击","防御","魔法","投掷","结束"};
+        JButton []button_list = new JButton[5];
+        for(int i=0;i<5;i++)
+        {
+            button_list[i] = new JButton(conts[i]);
+            button_panel.add(button_list[i]);
+        }
+
+
+
+        final int size = 21;
+        JPanel j5 = new JPanel();
+        GridLayout grid1=new GridLayout(size-1,size-1);
+        j5.setLayout(grid1);
+        //j5.setSize(600,400);
+        Label label[][]=new Label[size][size];
+        for(int i=1;i<size-1;i++){
+            for(int j=1;j<size-1;j++){
+                label[i][j]=new Label();
+                label[i][j].setSize(20,20);
+                if((i+j)%2==0)
+                    label[i][j].setBackground(Color.black);
+                else
+                    label[i][j].setBackground(Color.blue);
+                j5.add(label[i][j]);
+            }
+        }
+
+        GridBagLayout layout = new GridBagLayout();
+        this.setLayout(layout);
+        this.add(navigation_panel);
+        this.add(j1);
+        this.add(blank0);
+        this.add(j2);
+        //this.add(blank1);
+        this.add(j5);
+        this.add(blank1);
+        this.add(j3);
+        this.add(j4);
+        this.add(blank2);
+        this.add(button_panel);
+
+        GridBagConstraints s= new GridBagConstraints();
+        s.fill = GridBagConstraints.BOTH;
+        s.gridwidth=8;
+        s.weightx = 1;
+        s.weighty = 0;
+        layout.setConstraints(j1,s);
+
+        s.gridwidth = 0;
+        s.weightx = 0;
+        s.weighty = 0;
+        layout.setConstraints(blank0,s);
+
+        s.gridwidth = 4;
+        s.weightx = 1;
+        s.weighty = 0;
+        layout.setConstraints(j2,s);
+
+
+        s.gridwidth = 4;
+        s.weightx = 1;
+        s.weighty = 0;
+        layout.setConstraints(j5,s);
+
+        s.gridwidth = 0;
+        s.weightx  = 0;
+        s.weighty = 0;
+        layout.setConstraints(blank1,s);
+
+        s.gridwidth = 4;
+        s.weightx  = 1;
+        s.weighty = 1;
+        layout.setConstraints(j3,s);
+
+        s.gridwidth = 4;
+        s.weightx = 0;
+        s.weighty = 0;
+        layout.setConstraints(j4,s);
+
+        s.gridwidth = 0;
+        s.weightx = 0;
+        s.weighty = 0;
+        layout.setConstraints(blank2,s);
+    }
+}
