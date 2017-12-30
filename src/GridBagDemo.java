@@ -82,8 +82,6 @@ public class GridBagDemo extends JFrame implements gameconfig {
         JPanel blank2 = new JPanel();
         pick(p1);
         pick(p2);
-        this.getLayeredPane().add(bg,new Integer(Integer.MIN_VALUE));
-        bg.setBounds(0,0,bg_pic.getIconWidth(),bg_pic.getIconHeight());
 
 //        String []conts = new String[5];
         String conts[] = {"攻击", "魔法", "投掷","移动", "结束"};
@@ -640,7 +638,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
+                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -695,7 +693,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
+                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -1076,7 +1074,8 @@ public class GridBagDemo extends JFrame implements gameconfig {
     public void run() {
         currentplayer = p1;
         opponent = p2;
-        buttonlist_event();
+        buttonlist_event(
+          
     }
     public void Priest(player p){
         if(p.Mp<5)
@@ -1168,4 +1167,3 @@ public class GridBagDemo extends JFrame implements gameconfig {
         }
     }
 }
-
