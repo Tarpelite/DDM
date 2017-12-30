@@ -61,6 +61,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
 
     public GridBagDemo() {
         frame_init();
+
         init();
         run();
     }
@@ -412,7 +413,6 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 try{
                     roll(tmp,currentplayer);
                 }catch (Exception e2){
-                    e2.printStackTrace();
                     System.out.println(e2.getMessage());
                 }
             }
@@ -445,7 +445,6 @@ public class GridBagDemo extends JFrame implements gameconfig {
         player tmp_player = currentplayer;
         currentplayer = opponent;
         opponent = tmp_player;
-        curse_x = 1;
         navigation_panel.setText("现在是"+currentplayer.name+"的回合");
         try{
             chou_ka(currentplayer);
@@ -725,7 +724,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
+                        if (board[x - m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -780,7 +779,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                             || y + m.layout[i].b > 19 || y + m.layout[i].b < 1 || y + m.layout[i].b + 1 > 19 || y + m.layout[i].b - 1 > 19 || y + m.layout[i].b + 1 < 1 || y + m.layout[i].b - 1 < 1)
                         throw new OutofBoard();
                     else {
-                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 && board[x][y] != 0) {
+                        if (board[x + m.layout[i].a][y + m.layout[i].b] != 0 || board[x][y] != 0) {
                             count = -1;
                             break;
                         }
@@ -969,11 +968,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
             if (flag == 0) throw new Exception("没有找到" + cmd + "  请重新输入");
 
             try {
-                if (board[x][y] >= 0 || board_M[x][y] > 0)
-                {
-                    JOptionPane.showMessageDialog(this,"该地点无法进入","警告",JOptionPane.WARNING_MESSAGE);
-                    throw new conflictException1();
-                }
+                if (board[x][y] >= 0 || board_M[x][y] > 0) throw new conflictException1();
                 else if ((Math.abs(x - monster.x) + Math.abs(y - monster.y)) > move)
                     throw new conflictException2();
                 else {
@@ -981,7 +976,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     monster.x = x;
                     monster.y = y;
                     board_M[x][y] = monster.getId();
-                    JOptionPane.showMessageDialog(this,monster.name+"移动成功","info",JOptionPane.INFORMATION_MESSAGE);
+                    System.out.println(monster.name + "移动成功");
                     p.Mp -= Math.abs(x - monster.x) + Math.abs(y - monster.y);
                     update(p);
                 }
@@ -1021,7 +1016,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     if (board_M[i][j] > 0) {
                         for (Monster m : property) {
                             if (m.getId() == board_M[i][j]) {
-                                label[i][j].setText(Integer.toString(m.getId()));
+                                label[i][j].setText(Character.toString(m.name.charAt(0)));
                                 label[i][j].setBackground(Color.blue);
                             }
                         }
@@ -1033,7 +1028,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     if (board_M[i][j] > 0) {
                         for (Monster m : property) {
                             if (m.getId() == board_M[i][j]) {
-                                label[i][j].setText(Integer.toString(m.getId()));
+                                label[i][j].setText(Character.toString(m.name.charAt(0)));
                                 label[i][j].setBackground(Color.red);
                             }
                         }
@@ -1044,7 +1039,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 } else {
                     for (Monster m : property) {
                         if (m.getId() == board[i][j]) {
-                            label[i][j].setText(Integer.toString(m.getId()));
+                            label[i][j].setText(Character.toString(m.name.charAt(0)));
                         }
                     }
                 }
@@ -1093,10 +1088,9 @@ public class GridBagDemo extends JFrame implements gameconfig {
     }
 
     public void hand_field_update(int curse_x) {
-        Monster m = currentplayer.hand.get(curse_x-1);
         hand_cards[curse_x].setBorder(BorderFactory.createLineBorder(Color.green));
-        pic_field_update(m.pic_big);
-        info_board_update("<html><h2>"+m.name+"</h2><br>"+"<h2>怪兽id："+m.getId()+"</h2><br>"+m.Description+"</html>");
+        pic_field_update(currentplayer.hand.get(curse_x-1).pic_big);
+        info_board_update(currentplayer.hand.get(curse_x-1).Description);
         for(int i=1;i<=6;i++)
         {
             if(i!=curse_x)hand_cards[i].setBorder(BorderFactory.createLineBorder(Color.black));
@@ -1121,4 +1115,46 @@ public class GridBagDemo extends JFrame implements gameconfig {
         buttonlist_event();
 
     }
+    public void Priest(player p){
+        Object[] options={"确定","取消"};
+        int response = JOptionPane.showOptionDialog(null,"你将使用牧师技能","使用技能",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options,options[0]);
+        for(int i=0;i<p.hand.size();i++){
+            p.hand.get(i).Hp +=2;
+        }
+    }
+    public void constructer(player p){
+        int x,y;
+        String inputValue = JOptionPane.showInputDialog("请输入要填充的土地坐标");
+        String[]index = inputValue.split(" ");
+        x = Integer.valueOf(index[0]);
+        y = Integer.valueOf(index[1]);
+        board[x][y] = -1 * p.id;
+    }
+    public void singer(player p){
+        ArrayList<Object> options = new ArrayList<Object>();
+        for (Monster m : p1.alive) {
+            options.add(m.name);
+        }
+        int response = JOptionPane.showOptionDialog(null,"你将使用歌颂者技能，请选择你要强化的怪兽","使用技能",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options.toArray(),options.toArray()[0]);
+        p1.alive.get(response).Atk+=2;
+    }
+    public void shaman(player p1,player p2){
+        ArrayList<Object> options = new ArrayList<Object>();
+        for (Monster m : p1.alive) {
+            options.add(m.name);
+        }
+        int response = JOptionPane.showOptionDialog(null,"你将使用萨满技能，请选择你想献祭的怪兽","使用技能",JOptionPane.YES_OPTION,JOptionPane.QUESTION_MESSAGE,null,options.toArray(),options.toArray()[0]);
+        int t=response;
+        p1.alive.get(t).Hp=0;
+        for(int i=0;i<p2.alive.size();i++){
+            if(p2.alive.get(i).y==p1.alive.get(t).y) {
+                p2.alive.get(i).Hp-=p1.alive.get(t).Atk;
+                if(p2.alive.get(i).Hp<0)
+                    p2.alive.remove(i--);
+            }
+        }
+        p1.alive.remove(t);
+    }
+
 }
+
