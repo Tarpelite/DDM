@@ -580,10 +580,32 @@ public class GridBagDemo extends JFrame implements gameconfig {
 //                board[size-2][i] = -1;  //-1是蓝
 //            }
         //加载卡组
-        for (Monster m : property) {
-            p1.deck.add(m);
-            p2.deck.add(m);
-        }
+            ArrayList<Monster>vis = new ArrayList<>();
+            for(int i=0;i<30;i++)
+            {
+                int seed = (int) (Math.random() * property.size());
+               p1.deck.add(property.get(seed));
+               vis.add(property.get(seed));
+            }
+            int j=0;
+            while(j<30)
+            {
+                int seed = (int)(Math.random()*property.size());
+                Monster m1 = property.get(seed);
+                int flag =0;
+                for(Monster m2:vis){
+                    if(m2.equals(m1)){
+                        flag = 1;
+                    }
+                }
+                if(flag == 0){
+                    p2.deck.add(m1);
+                    vis.add(m1);
+                    j++;
+                }
+            }
+
+
         p1.target_x = 19;
         p1.target_y = 10;
         p2.target_x = 1;
@@ -753,6 +775,10 @@ public class GridBagDemo extends JFrame implements gameconfig {
     public void Attack(player p, player opponent) throws WinnerException {
         String cmd;
 //        System.out.println(p.name + "可以使用的怪兽有：");
+        if(p.Mp<2){
+            JOptionPane.showMessageDialog(this,"行动力不足，攻击需要2点行动力","警告",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         ArrayList<Object> options = new ArrayList<>();
         for (Monster m : p.alive) {
             options.add(m.name);
@@ -765,12 +791,14 @@ public class GridBagDemo extends JFrame implements gameconfig {
         ArrayList<Object>  option2 = new ArrayList<Object>();
         Monster attacker = new Monster();
         if(!options.toArray()[response].equals("取消")) {
+            p.Mp -= 2;
+            update(p);
             cmd = (String) options.toArray()[response];
             for (Monster m : p.alive) {
                 if (m.name.equals(cmd)) {
                     attacker = m;
 //                    System.out.println("你可进行攻击的目标有：");
-                    JOptionPane.showConfirmDialog(this,m.name+" 攻击力:"+m.Atk+"\r\n生命值:"+m.Hp+"\r\n坐标:("+m.x+","+m.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
+                    JOptionPane.showConfirmDialog(this,m.name+" 攻击力:"+m.Atk+"\r\nID:"+m.getId()+"\r\n生命值:"+m.Hp+"\r\n坐标:("+m.x+","+m.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
                     int x = m.x;
                     int y = m.y;
                     if (p.id == 1) {
@@ -838,8 +866,9 @@ public class GridBagDemo extends JFrame implements gameconfig {
                 } else {
                     for (Monster e : opponent.alive) {
                         if (e.name.equals(cmd)) {
-                            JOptionPane.showConfirmDialog(this,e.name+" 攻击力:"+e.Atk+"\r\n生命值:"+e.Hp+"\r\n坐标:("+e.x+","+e.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
+                            JOptionPane.showConfirmDialog(this,e.name+" 攻击力:"+e.Atk+"\r\nID:"+e.getId()+"\r\n生命值:"+e.Hp+"\r\n坐标:("+e.x+","+e.y+")","怪兽信息确认",JOptionPane.YES_NO_OPTION);
                             e.Hp -= attacker.Atk;
+                            attacker.Hp -= e.Atk;
                             if (e.Hp <= 0) {
 //                                if (opponent.id == 1) board[e.x][e.y] = -1;
 //                                else board[e.x][e.y] = -2;
@@ -847,6 +876,11 @@ public class GridBagDemo extends JFrame implements gameconfig {
                                 opponent.alive.remove(e);
                                 update(p);
                                 if (check(opponent)) throw new WinnerException();
+                            }
+                            if(attacker.Hp<=0){
+                                board_M[attacker.x][attacker.y] = 0;
+                                currentplayer.alive.remove(attacker);
+                                update(p);
                             }
                             break;
                         }
@@ -923,7 +957,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     break;
                 }
             }
-            int s=JOptionPane.showConfirmDialog(this,monster.name+" 攻击力:"+monster.Atk+"\r\n生命值:"+monster.Hp+"\r\n坐标:("+monster.x+","+monster.y+")","确认怪兽信息",JOptionPane.YES_NO_OPTION);
+            int s=JOptionPane.showConfirmDialog(this,monster.name+" 攻击力:"+monster.Atk+"\r\nID:"+monster.getId()+"\r\n生命值:"+monster.Hp+"\r\n坐标:("+monster.x+","+monster.y+")","确认怪兽信息",JOptionPane.YES_NO_OPTION);
             if(s== 0) {
                 cnt = 0;
                 String inputValue = JOptionPane.showInputDialog(this, "请输入目标位置的坐标");
@@ -934,10 +968,12 @@ public class GridBagDemo extends JFrame implements gameconfig {
                     if (board[x][y] >= 0 || board_M[x][y] > 0) {
                         JOptionPane.showMessageDialog(this, "该地点无法进入", "警告", JOptionPane.WARNING_MESSAGE);
                         throw new conflictException1();
-                    } else if (!isConencted(monster.x,monster.y,x,y))
-                        JOptionPane.showMessageDialog(this,"无法到达目标地点","警告",JOptionPane.WARNING_MESSAGE);
+                    } else if (!isConencted(monster.x,monster.y,x,y)) {
+                        JOptionPane.showMessageDialog(this, "无法到达该地点", "警告", JOptionPane.WARNING_MESSAGE);
+                        cnt =0;
+                    }
                     else {
-                        if(cnt > p.Mp)JOptionPane.showMessageDialog(this,"无法到达该地点","警告",JOptionPane.WARNING_MESSAGE);
+                        if(cnt > p.Mp)JOptionPane.showMessageDialog(this,"行动力不足","警告",JOptionPane.WARNING_MESSAGE);
                         else {
                             board_M[monster.x][monster.y] = 0;
                             p.Mp -= cnt;
@@ -1019,8 +1055,8 @@ public class GridBagDemo extends JFrame implements gameconfig {
         label[p1.target_x][p1.target_y].setBackground(Color.PINK);
         label[p2.target_x][p2.target_y].setBackground(Color.CYAN);
         //展示p1信息
-        p1_info.setText(p1.name + "(" + p1.color + ")" + "目前的状态是：\n" + "Hp:" + p1.Hp + "行动点" + p1.Mp + "手牌数"+p1.hand.size());
-        p2_info.setText(p2.name + "(" + p2.color + ")" + "目前的状态是：\n" + "Hp:" + p2.Hp + "行动点" + p2.Mp + "手牌数" + p2.hand.size());
+        p1_info.setText(p1.name + "(" + p1.color + ")" + "目前的状态是：\r\n" + "Hp:" + p1.Hp + " 行动点" + p1.Mp + " 手牌数"+p1.hand.size()+" 卡组剩余卡牌:"+p1.deck.size());
+        p2_info.setText(p2.name + "(" + p2.color + ")" + "目前的状态是：\r\n" + "Hp:" + p2.Hp + " 行动点" + p2.Mp + " 手牌数" + p2.hand.size()+" 卡组剩余卡牌:"+p2.deck.size());
 
         //设置图区
         //pic_field.setIcon(new ImageIcon("./pic_img/pic_1.jpg"));
@@ -1134,7 +1170,7 @@ public class GridBagDemo extends JFrame implements gameconfig {
             for (int i = 0; i < p2.alive.size(); i++) {
                 if (p2.alive.get(i).y == p1.alive.get(t).y) {
                     p2.alive.get(i).Hp -= p1.alive.get(t).Atk;
-                    if (p2.alive.get(i).Hp < 0)
+                    if (p2.alive.get(i).Hp <= 0)
                         p2.alive.remove(i--);
                 }
             }
