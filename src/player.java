@@ -7,6 +7,7 @@ public class player {
     String color;
     int id;
     int characterid;
+    int hidden=0;
     int Hp = 3;
     int Mp = 0;
     int target_x = 0;
